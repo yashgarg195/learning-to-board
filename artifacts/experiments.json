@@ -1,0 +1,561 @@
+{
+ "benchmark": [
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "Random",
+   "mean": 415.0,
+   "std": 17.8,
+   "min": 370,
+   "max": 454
+  },
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "Back-to-front",
+   "mean": 477.9,
+   "std": 21.9,
+   "min": 429,
+   "max": 518
+  },
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "WILMA",
+   "mean": 327.1,
+   "std": 16.3,
+   "min": 287,
+   "max": 361
+  },
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "Steffen-style",
+   "mean": 328.0,
+   "std": 15.0,
+   "min": 295,
+   "max": 350
+  },
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "Outside-in zones",
+   "mean": 320.5,
+   "std": 13.8,
+   "min": 287,
+   "max": 353
+  },
+  {
+   "gate": "front",
+   "arrival": "random",
+   "strategy": "RL agent",
+   "mean": 336.1,
+   "std": 13.5,
+   "min": 313,
+   "max": 375
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "Random",
+   "mean": 414.4,
+   "std": 21.0,
+   "min": 374,
+   "max": 460
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "Back-to-front",
+   "mean": 611.8,
+   "std": 18.2,
+   "min": 564,
+   "max": 652
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "WILMA",
+   "mean": 391.9,
+   "std": 14.2,
+   "min": 359,
+   "max": 426
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "Steffen-style",
+   "mean": 209.5,
+   "std": 5.0,
+   "min": 195,
+   "max": 217
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "Outside-in zones",
+   "mean": 391.9,
+   "std": 14.2,
+   "min": 359,
+   "max": 426
+  },
+  {
+   "gate": "front",
+   "arrival": "queued",
+   "strategy": "RL agent",
+   "mean": 396.6,
+   "std": 13.2,
+   "min": 368,
+   "max": 419
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "Random",
+   "mean": 411.5,
+   "std": 22.7,
+   "min": 375,
+   "max": 464
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "Back-to-front",
+   "mean": 480.1,
+   "std": 23.3,
+   "min": 431,
+   "max": 536
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "WILMA",
+   "mean": 327.0,
+   "std": 11.6,
+   "min": 304,
+   "max": 358
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "Steffen-style",
+   "mean": 323.7,
+   "std": 10.8,
+   "min": 302,
+   "max": 348
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "Outside-in zones",
+   "mean": 317.0,
+   "std": 10.9,
+   "min": 295,
+   "max": 348
+  },
+  {
+   "gate": "back",
+   "arrival": "random",
+   "strategy": "RL agent",
+   "mean": 334.2,
+   "std": 12.8,
+   "min": 308,
+   "max": 358
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "Random",
+   "mean": 409.0,
+   "std": 24.2,
+   "min": 371,
+   "max": 470
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "Back-to-front",
+   "mean": 611.5,
+   "std": 18.4,
+   "min": 568,
+   "max": 652
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "WILMA",
+   "mean": 391.7,
+   "std": 13.9,
+   "min": 358,
+   "max": 426
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "Steffen-style",
+   "mean": 208.7,
+   "std": 3.6,
+   "min": 202,
+   "max": 220
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "Outside-in zones",
+   "mean": 391.7,
+   "std": 13.9,
+   "min": 358,
+   "max": 426
+  },
+  {
+   "gate": "back",
+   "arrival": "queued",
+   "strategy": "RL agent",
+   "mean": 371.6,
+   "std": 17.8,
+   "min": 342,
+   "max": 423
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "Random",
+   "mean": 256.4,
+   "std": 13.5,
+   "min": 226,
+   "max": 283
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "Back-to-front",
+   "mean": 303.2,
+   "std": 17.3,
+   "min": 263,
+   "max": 344
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "WILMA",
+   "mean": 197.2,
+   "std": 11.5,
+   "min": 177,
+   "max": 234
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "Steffen-style",
+   "mean": 193.9,
+   "std": 10.7,
+   "min": 173,
+   "max": 215
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "Outside-in zones",
+   "mean": 190.8,
+   "std": 10.3,
+   "min": 174,
+   "max": 211
+  },
+  {
+   "gate": "both",
+   "arrival": "random",
+   "strategy": "RL agent",
+   "mean": 212.8,
+   "std": 16.6,
+   "min": 190,
+   "max": 264
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "Random",
+   "mean": 256.7,
+   "std": 14.6,
+   "min": 223,
+   "max": 287
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "Back-to-front",
+   "mean": 321.4,
+   "std": 14.2,
+   "min": 287,
+   "max": 355
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "WILMA",
+   "mean": 214.8,
+   "std": 11.8,
+   "min": 197,
+   "max": 248
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "Steffen-style",
+   "mean": 134.1,
+   "std": 3.7,
+   "min": 126,
+   "max": 144
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "Outside-in zones",
+   "mean": 214.8,
+   "std": 11.8,
+   "min": 197,
+   "max": 248
+  },
+  {
+   "gate": "both",
+   "arrival": "queued",
+   "strategy": "RL agent",
+   "mean": 225.9,
+   "std": 13.3,
+   "min": 192,
+   "max": 255
+  }
+ ],
+ "dp": [
+  {
+   "gamma": 0.5,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.18,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 0.7,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.18,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 0.85,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.19,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 0.95,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.19,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 0.99,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.19,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 1.0,
+   "method": "value iteration",
+   "boarding_time": 37.0,
+   "sweeps": 2,
+   "backups": 95986,
+   "seconds": 0.18,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 1.0,
+   "method": "policy iteration",
+   "boarding_time": 37.0,
+   "sweeps": 19,
+   "backups": 911867,
+   "seconds": 1.25,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  },
+  {
+   "gamma": 0.95,
+   "method": "policy iteration",
+   "boarding_time": 37.0,
+   "sweeps": 18,
+   "backups": 863874,
+   "seconds": 1.14,
+   "first_6_actions": "row 4 window, row 3 window, row 2 window, row 1 window, row 4 window, row 3 window"
+  }
+ ],
+ "bandit": {
+  "eps": {
+   "counts": [
+    8,
+    4,
+    4,
+    277,
+    7
+   ],
+   "best_arm": "wilma",
+   "final_regret": 2.755,
+   "arms": [
+    "random",
+    "back_to_front",
+    "wilma",
+    "steffen",
+    "outside_in"
+   ]
+  },
+  "ucb": {
+   "counts": [
+    46,
+    35,
+    72,
+    72,
+    75
+   ],
+   "best_arm": "wilma",
+   "final_regret": 16.331,
+   "arms": [
+    "random",
+    "back_to_front",
+    "wilma",
+    "steffen",
+    "outside_in"
+   ]
+  }
+ },
+ "transfer": [
+  {
+   "aircraft": "ATR 72 (2-2, regional)",
+   "passengers": 64,
+   "RL agent": 159.7,
+   "best baseline": "Outside-in zones",
+   "best baseline time": 153.8,
+   "random": 180.3,
+   "gap vs best baseline %": 3.8
+  },
+  {
+   "aircraft": "A320 / 737 (3-3)",
+   "passengers": 162,
+   "RL agent": 365.8,
+   "best baseline": "WILMA",
+   "best baseline time": 348.1,
+   "random": 445.2,
+   "gap vs best baseline %": 5.1
+  },
+  {
+   "aircraft": "Boeing 787 (3-3-3)",
+   "passengers": 291,
+   "RL agent": 381.4,
+   "best baseline": "Outside-in zones",
+   "best baseline time": 349.8,
+   "random": 421.4,
+   "gap vs best baseline %": 9.0
+  },
+  {
+   "aircraft": "Boeing 777 (3-4-3)",
+   "passengers": 378,
+   "RL agent": 433.2,
+   "best baseline": "Outside-in zones",
+   "best baseline time": 430.8,
+   "random": 508.6,
+   "gap vs best baseline %": 0.6
+  },
+  {
+   "aircraft": "Airbus A380 (2 decks)",
+   "passengers": 612,
+   "RL agent": 437.9,
+   "best baseline": "Outside-in zones",
+   "best baseline time": 450.3,
+   "random": 526.9,
+   "gap vs best baseline %": -2.8
+  }
+ ],
+ "generalisation_tax": [
+  {
+   "policy": "Outside-in zones",
+   "mean": 160.2,
+   "stdev": 10.7
+  },
+  {
+   "policy": "RL specialist (mid only)",
+   "mean": 161.0,
+   "stdev": 7.1
+  },
+  {
+   "policy": "WILMA",
+   "mean": 161.3,
+   "stdev": 8.5
+  },
+  {
+   "policy": "Steffen-style",
+   "mean": 163.1,
+   "stdev": 9.4
+  },
+  {
+   "policy": "RL generalist (mixture-trained)",
+   "mean": 167.6,
+   "stdev": 11.9
+  },
+  {
+   "policy": "Random",
+   "mean": 220.9,
+   "stdev": 17.1
+  },
+  {
+   "policy": "Back-to-front",
+   "mean": 268.9,
+   "stdev": 19.4
+  }
+ ],
+ "mc_prediction": [
+  {
+   "mode": "first_visit",
+   "states_visited": 97,
+   "mean_V": -40.72,
+   "min_V": -66.84,
+   "max_V": -8.91,
+   "total_updates": 9434
+  },
+  {
+   "mode": "every_visit",
+   "states_visited": 97,
+   "mean_V": -40.71,
+   "min_V": -66.84,
+   "max_V": -8.91,
+   "total_updates": 9600
+  }
+ ],
+ "policy_meta": {
+  "algo": "tabular policy gradient (paired baseline, best of 5)",
+  "episodes": 10000,
+  "restarts": 5,
+  "trained_on": [
+   "mid",
+   "mid",
+   "a320",
+   "atr72"
+  ],
+  "eval_mid_mean": 164.83333333333334,
+  "restart_validation_scores": [
+   168.4,
+   203.55,
+   194.45,
+   167.5
+  ]
+ },
+ "seeds": 40
+}

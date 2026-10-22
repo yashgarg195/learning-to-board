@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Example scenario for POST /api/simulate. Every field here is also",
+    "exposed as a control in the web UI. Timings are in simulator ticks."
+  ],
+  "config": {
+    "aircraft": "a320",
+    "n_passengers": 150,
+    "gate": "front",
+    "arrival": "random",
+    "luggage_fraction": 0.6,
+    "stow_ticks": 6,
+    "no_bag_ticks": 2,
+    "shuffle_ticks": 4,
+    "walk_ticks_per_row": 1,
+    "seed": 42
+  },
+  "strategy": "wilma",
+  "policy": null,
+
+  "_field_notes": {
+    "aircraft": "tiny | mid | atr72 | a320 | b787 | b777 | a380",
+    "n_passengers": "null fills the cabin; otherwise 1..seats",
+    "gate": "front | back | both (both opens two doors and routes each passenger to the nearer one)",
+    "arrival": "random | queued | groups — how well passengers comply with the called order",
+    "luggage_fraction": "0.0..1.0 share of passengers with a carry-on to stow",
+    "stow_ticks": "ticks to stow a bag in the overhead bin",
+    "no_bag_ticks": "ticks to sit down without a bag",
+    "shuffle_ticks": "extra ticks when an already-seated neighbour must stand up",
+    "walk_ticks_per_row": "ticks to advance one row along the aisle",
+    "seed": "fixes the manifest, seat assignment and bag draw",
+    "strategy": "random | back_to_front | wilma | steffen | outside_in | rl",
+    "policy": "required when strategy is 'rl'; a name from GET /api/policies"
+  }
+}

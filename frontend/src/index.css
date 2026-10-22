@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-chart-paper text-chart-ink font-sans antialiased;
+  }
+  /* Keyboard focus must stay visible everywhere. */
+  :where(button, a, input, select, [tabindex]):focus-visible {
+    @apply outline-none ring-2 ring-magenta ring-offset-2 ring-offset-chart-paper;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-chart-panel border border-chart-line rounded-sm;
+  }
+  .chart-label {
+    @apply font-mono text-[10px] uppercase tracking-chart text-chart-muted;
+  }
+  .field-label {
+    @apply block font-mono text-[10px] uppercase tracking-chart text-chart-muted mb-1.5;
+  }
+  .control {
+    @apply w-full bg-white border border-chart-line rounded-sm px-2.5 py-1.5
+           text-sm text-chart-ink transition-colors
+           hover:border-chart-rule disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-sm border
+           px-3 py-1.5 text-sm font-medium transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+  .btn-primary {
+    @apply btn bg-magenta border-magenta text-white hover:bg-magenta-deep
+           hover:border-magenta-deep;
+  }
+  .btn-ghost {
+    @apply btn bg-white border-chart-line text-chart-ink hover:bg-chart-paper
+           hover:border-chart-rule;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

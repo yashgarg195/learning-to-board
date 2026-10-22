@@ -23,6 +23,7 @@ export function ConfigPanel({
   const maxSeats = craft?.seats ?? 1;
   const strat = options.strategies.find((s) => s.value === strategy);
   const noPolicies = options.policies.length === 0;
+  const selectedPolicy = options.policies.find((p) => p.name === policy);
 
   return (
     <form
@@ -42,16 +43,27 @@ export function ConfigPanel({
             n_passengers: null,
           })}
         >
-          {options.aircraft.map((a) => (
-            <option key={a.value} value={a.value}>
-              {a.label} — {a.seats} seats
-            </option>
-          ))}
+          {["aircraft", "benchmark"].map((k) => {
+            const group = options.aircraft.filter((a) => a.kind === k);
+            if (group.length === 0) return null;
+            return (
+              <optgroup key={k}
+                label={k === "aircraft" ? "Aircraft" : "Benchmark cabins"}>
+                {group.map((a) => (
+                  <option key={a.value} value={a.value}>
+                    {a.label} — {a.seats} seats
+                  </option>
+                ))}
+              </optgroup>
+            );
+          })}
         </select>
         {craft && (
           <p className="mt-1 chart-label normal-case tracking-normal">
             {craft.rows} rows · {craft.layout} ·{" "}
             {craft.decks > 1 ? `${craft.decks} decks` : "single deck"}
+            {craft.kind === "benchmark"
+              ? " · benchmark cabin, not a real type" : ""}
           </p>
         )}
       </div>
@@ -153,10 +165,35 @@ export function ConfigPanel({
             onChange={(e) => onPolicy(e.target.value || null)}
           >
             <option value="">Select a policy…</option>
-            {options.policies.map((p) => (
-              <option key={p.name} value={p.name}>{p.name}</option>
-            ))}
+            <optgroup label="Trained agents">
+              {options.policies
+                .filter((p) => p.kind !== "reference")
+                .map((p) => (
+                  <option key={p.name} value={p.name}>{p.label}</option>
+                ))}
+            </optgroup>
+            {options.policies.some((p) => p.kind === "reference") && (
+              <optgroup label="Lab references (expected to be slower)">
+                {options.policies
+                  .filter((p) => p.kind === "reference")
+                  .map((p) => (
+                    <option key={p.name} value={p.name}>{p.label}</option>
+                  ))}
+              </optgroup>
+            )}
           </select>
+          {selectedPolicy && (
+            <p className="mt-1 chart-label normal-case tracking-normal">
+              {selectedPolicy.note}
+            </p>
+          )}
+          {selectedPolicy?.kind === "reference" && (
+            <p className="mt-1 text-xs text-alert">
+              This is an algorithm-comparison artifact kept to show which algorithms fail
+              here. It is expected to lose to the heuristics — use a trained
+              agent to judge the RL approach.
+            </p>
+          )}
         </div>
       )}
 

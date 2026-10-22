@@ -34,7 +34,28 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     );
   }
   const text = await res.text();
-  const body = text ? JSON.parse(text) : null;
+  // A 500 from a proxy or an unhandled server error can be plain text or
+  // HTML. Parsing that as JSON throws "Unexpected token 'I'", which hides the
+  // real failure, so fall back to reporting the status and the raw body.
+  let body: any = null;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      if (!res.ok) {
+        throw new ApiError(
+          res.status, "server_error",
+          `The API returned ${res.status} ${res.statusText || "Error"}.`,
+          [{ field: "response", problem: text.slice(0, 300) }],
+        );
+      }
+      throw new ApiError(
+        res.status, "bad_response",
+        "The API returned a response that was not valid JSON.",
+        [{ field: "response", problem: text.slice(0, 300) }],
+      );
+    }
+  }
   if (!res.ok) {
     const e = body?.error;
     throw new ApiError(

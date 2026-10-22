@@ -73,19 +73,25 @@ export function CongestionTrace({ series, tick, onSeek }: Props) {
         <span className="chart-label">
           Aisle activity — peak {peak} of {total} passengers moving at once
         </span>
-        <span className="flex gap-3 items-center">
+        <span className="flex gap-4 items-center">
           {BANDS.map((b) => (
-            <span key={b.key} className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-[1px]"
+            <span key={b.key} className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-[2px] shrink-0"
                 style={{ background: b.color }} aria-hidden />
-              <span className="chart-label">
-                {b.label}
-                {now ? ` ${now[b.key]}` : ""}
+              <span className="flex items-baseline gap-1.5">
+                <span className="chart-label">{b.label}</span>
+                <span className="font-mono text-base font-semibold
+                                 tabular-nums text-chart-ink leading-none">
+                  {now ? now[b.key] : 0}
+                </span>
               </span>
             </span>
           ))}
-          <span className="chart-label border-l border-chart-line pl-3">
-            Active {active}
+          <span className="flex items-baseline gap-1.5 border-l
+                           border-chart-line pl-4">
+            <span className="chart-label">Active</span>
+            <span className="font-mono text-base font-semibold tabular-nums
+                             text-chart-ink leading-none">{active}</span>
           </span>
         </span>
       </figcaption>
@@ -97,12 +103,13 @@ export function CongestionTrace({ series, tick, onSeek }: Props) {
         style={{ height: H }}
         role="slider"
         tabIndex={0}
-        aria-label="Simulation timeline. Arrow keys step one tick."
+        aria-label="Simulation timeline in ticks. Arrow keys step one tick."
         aria-valuemin={0}
         aria-valuemax={Math.max(0, n - 1)}
         aria-valuenow={tick}
         aria-valuetext={
-          `Tick ${tick} of ${Math.max(0, n - 1)}, ${active} passengers active`
+          `Tick ${tick} of ${Math.max(0, n - 1)} ticks, `
+          + `${active} passengers active`
         }
         onMouseDown={(e) => {
           seekFromEvent(e.clientX);
@@ -147,7 +154,8 @@ export function CongestionTrace({ series, tick, onSeek }: Props) {
           stroke="#13242E" strokeWidth="2" vectorEffect="non-scaling-stroke" />
       </svg>
       <p className="chart-label mt-1 normal-case tracking-normal">
-        Lower strip: share of the cabin seated. Click or drag to scrub.
+        Horizontal axis is simulator ticks. Lower strip: share of the cabin
+        seated. Click or drag to scrub through ticks.
       </p>
     </figure>
   );

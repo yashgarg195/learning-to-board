@@ -1,8 +1,17 @@
-"""Gymnasium environment for the gate controller (spec Section 3, Lab 1).
+"""Gymnasium environment for the gate controller.
 
   Agent     : the gate controller
-  Action    : release the next passenger from one of ``n_bands x 3`` groups
-              (row band measured from the door  x  window/middle/aisle)
+  Action    : release the next passenger from one of
+              ``n_bands x 3 x parity`` groups -- row band measured from the
+              door, window/middle/aisle, and the row's parity.
+
+              The parity term exists because Steffen's advantage comes from
+              interleaving *alternate rows*, so that two consecutive stowers
+              never stand back to back. Without it the action space cannot
+              express that schedule at all, which measurably caps the agent
+              below Steffen (see `scripts/probe_rl_vs_baselines.py`). Set
+              ``cfg.use_parity = False`` for the original 12-action space;
+              policies record which one they were trained with.
   State     : compact, size-independent features -- how many passengers are
               still waiting per band and per seat type, aisle occupancy per
               band, how many are currently blocked, how many are seated
@@ -36,16 +45,40 @@ from .simulator import Simulator
 SEAT_TYPE_INDEX = {t: i for i, t in enumerate(SEAT_TYPES)}
 
 
+def n_parity(cfg: SimConfig) -> int:
+    """2 when the action space distinguishes odd/even rows, else 1."""
+    return 2 if getattr(cfg, "use_parity", False) else 1
+
+
 def n_actions(cfg: SimConfig) -> int:
-    return cfg.n_bands * len(SEAT_TYPES)
+    return cfg.n_bands * len(SEAT_TYPES) * n_parity(cfg)
 
 
-def action_to_group(cfg: SimConfig, a: int) -> Tuple[int, str]:
-    return (a // len(SEAT_TYPES), SEAT_TYPES[a % len(SEAT_TYPES)])
+def action_to_group(cfg: SimConfig, a: int) -> Tuple[int, str, int]:
+    """Decode an action into (band, seat type, row parity).
+
+    Parity is 0 for both halves when the parity dimension is disabled, so
+    callers can treat the three-tuple uniformly.
+    """
+    npar = n_parity(cfg)
+    nt = len(SEAT_TYPES)
+    par = a % npar if npar > 1 else 0
+    rest = a // npar if npar > 1 else a
+    return (rest // nt, SEAT_TYPES[rest % nt], par)
 
 
-def group_to_action(cfg: SimConfig, group: Tuple[int, str]) -> int:
-    return group[0] * len(SEAT_TYPES) + SEAT_TYPE_INDEX[group[1]]
+def group_to_action(cfg: SimConfig, group: Tuple[int, str, int]) -> int:
+    npar = n_parity(cfg)
+    base = group[0] * len(SEAT_TYPES) + SEAT_TYPE_INDEX[group[1]]
+    if npar == 1:
+        return base
+    return base * npar + (group[2] % npar)
+
+
+def passenger_group(cfg: SimConfig, p) -> Tuple[int, str, int]:
+    """The action group a passenger belongs to."""
+    return (p.band, p.seat.seat_type,
+            p.seat.row % 2 if n_parity(cfg) > 1 else 0)
 
 
 def observe(sim: Simulator, last_action: int = -1) -> np.ndarray:
@@ -74,12 +107,16 @@ def observe(sim: Simulator, last_action: int = -1) -> np.ndarray:
     # to the same row band back to back).
     last_band = np.zeros(nb + 1, dtype=np.float32)
     last_type = np.zeros(len(SEAT_TYPES) + 1, dtype=np.float32)
+    last_par = np.zeros(3, dtype=np.float32)
     if last_action < 0:
         last_band[nb] = 1.0
         last_type[len(SEAT_TYPES)] = 1.0
+        last_par[2] = 1.0
     else:
-        last_band[last_action // len(SEAT_TYPES)] = 1.0
-        last_type[last_action % len(SEAT_TYPES)] = 1.0
+        lb, lt, lp = action_to_group(cfg, last_action)
+        last_band[lb] = 1.0
+        last_type[SEAT_TYPE_INDEX[lt]] = 1.0
+        last_par[lp if n_parity(cfg) > 1 else 2] = 1.0
 
     feats = np.concatenate([
         band_pending / n,
@@ -90,13 +127,14 @@ def observe(sim: Simulator, last_action: int = -1) -> np.ndarray:
                   len(sim.pending) / n], dtype=np.float32),
         last_band,
         last_type,
+        last_par,
     ])
     return feats.astype(np.float32)
 
 
 def obs_size(cfg: SimConfig) -> int:
     nb = cfg.n_bands
-    return nb * 2 + len(SEAT_TYPES) + 3 + (nb + 1) + (len(SEAT_TYPES) + 1)
+    return nb * 2 + len(SEAT_TYPES) + 3 + (nb + 1) + (len(SEAT_TYPES) + 1) + 3
 
 
 PROGRESS_BINS = 12
@@ -108,16 +146,27 @@ def tabular_key(obs: np.ndarray, sim: Simulator,
 
     DECISION: the boarding problem is essentially a *schedule* -- which group
     to call at which point of the queue -- so the tabular state is
-    (progress through the queue, band just released, seat type just released).
-    Availability of a group is handled by action masking rather than by the
-    state, which keeps the table small enough to actually be visited.
+    (progress through the queue, band just released, seat type just released,
+    parity just released). Availability of a group is handled by action
+    masking rather than by the state, which keeps the table small enough to
+    actually be visited.
+
+    The parity term is what lets the agent learn to *alternate* rows, which
+    is the mechanism behind Steffen's advantage. It doubles the state count
+    (~240 -> ~480), which is still trivially tabular.
     """
     nb = sim.cfg.n_bands
     released = sim.n - len(sim.pending)
     prog = int(min(PROGRESS_BINS - 1, released * PROGRESS_BINS / max(1, sim.n)))
+    npar = n_parity(sim.cfg)
     if last_action < 0:
-        return (prog, nb, len(SEAT_TYPES))
-    return (prog, last_action // len(SEAT_TYPES), last_action % len(SEAT_TYPES))
+        if npar == 1:
+            return (prog, nb, len(SEAT_TYPES))
+        return (prog, nb, len(SEAT_TYPES), npar)
+    lb, lt, lp = action_to_group(sim.cfg, last_action)
+    if npar == 1:
+        return (prog, lb, SEAT_TYPE_INDEX[lt])
+    return (prog, lb, SEAT_TYPE_INDEX[lt], lp)
 
 
 class BoardingEnv(gym.Env):
@@ -168,7 +217,9 @@ class BoardingEnv(gym.Env):
         assert self.sim is not None
         for _, _, cands in self._free:
             for pid in cands:
-                mask[group_to_action(self.cfg, self.sim.passengers[pid].group)] = 1
+                mask[group_to_action(
+                    self.cfg,
+                    passenger_group(self.cfg, self.sim.passengers[pid]))] = 1
         return mask
 
     def step(self, action: int):
@@ -178,12 +229,15 @@ class BoardingEnv(gym.Env):
         b0 = sim.blocking_events
         reward_extra = 0.0
 
-        band, stype = action_to_group(self.cfg, int(action))
+        band, stype, par = action_to_group(self.cfg, int(action))
+        npar = n_parity(self.cfg)
         chosen = None
         for deck, row, cands in self._free:
             matches = [pid for pid in cands
                        if sim.passengers[pid].band == band
-                       and sim.passengers[pid].seat.seat_type == stype]
+                       and sim.passengers[pid].seat.seat_type == stype
+                       and (npar == 1
+                            or sim.passengers[pid].seat.row % 2 == par)]
             if matches:
                 chosen = matches[0]
                 break

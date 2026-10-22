@@ -133,9 +133,13 @@ immediately with a job handle. The request never blocks on training.
 ```json
 { "config": { "aircraft": "mid", "seed": 1 },
   "episodes": 2000, "restarts": 2,
-  "alpha": 0.25, "gamma": 1.0, "batch": 16,
+  "alpha": 0.25, "batch": 16,
   "save_as": "my_policy" }
 ```
+
+There is no `gamma` field. The reward is −1 per tick and the objective is total
+boarding time, so the trainer is undiscounted by construction (γ = 1) and the
+request rejects `gamma` with 422 rather than accepting a value it would ignore.
 
 `save_as` must match `^[A-Za-z0-9_\-]{1,40}$` (so it cannot escape the policy
 directory) and may be `null` to train without persisting.
@@ -183,9 +187,20 @@ Most recent jobs first.
 ## `GET /api/policies`
 
 ```json
-[{ "name": "rl_agent", "meta": { "algo": "tabular policy gradient (REINFORCE, paired per-seed baseline)",
-   "episodes": 12000, "aircraft": "mid", "validation_ticks": 160.9 } }]
+[{ "name": "rl_agent_mid", "kind": "agent",
+   "label": "Trained agent — specialist (best overall)",
+   "note": "Policy gradient, 10000 episodes, best of 5 restarts · 157.1 ticks on the mid cabin",
+   "meta": { "algo": "...", "eval_mid_mean": 157.1 } }]
 ```
+
+Sorted strongest first. `kind` separates three very different things that would
+otherwise look identical in a dropdown:
+
+| `kind` | What it is |
+|---|---|
+| `agent` | Trained for use. `rl_parity_mid` (best), `rl_agent_mid`, `rl_agent`. The UI auto-selects the strongest. |
+| `user` | Trained in the app via `/api/train`. |
+| `reference` | Algorithm-comparison artifacts (`rl_mc`, `rl_sarsa`, `rl_qlearning`, `rl_linear`) kept to demonstrate *which algorithms fail on this problem*. They are slower than the heuristics by design, so `/api/policies` and `/api/options` **omit them**. `load_policy` still accepts them by name for scripted runs. |
 
 Policies are plain JSON Q-tables under `artifacts/policies/`. The tabular state
 is size-independent, so a policy trained on the 60-seat `mid` cabin can be

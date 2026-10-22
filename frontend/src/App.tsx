@@ -3,12 +3,13 @@ import { ApiError, api } from "./api/client";
 import type {
   OptionsResponse, SimConfig, SimulateResponse, StrategyName,
 } from "./api/types";
-import { CabinPlan } from "./components/CabinPlan";
+import { CabinLegend, CabinPlan } from "./components/CabinPlan";
 import { ComparePanel } from "./components/ComparePanel";
 import { CongestionTrace } from "./components/CongestionTrace";
 import { ConfigPanel } from "./components/ConfigPanel";
 import { ErrorNote } from "./components/ErrorNote";
 import { MetricsStrip } from "./components/MetricsStrip";
+import { MethodPanel } from "./components/MethodPanel";
 import { PlaybackBar } from "./components/PlaybackBar";
 import { TrainPanel } from "./components/TrainPanel";
 import { usePlayback } from "./hooks/usePlayback";
@@ -27,7 +28,7 @@ const INITIAL: SimConfig = {
   seed: 42,
 };
 
-type Tab = "compare" | "train";
+type Tab = "compare" | "train" | "method";
 
 export default function App() {
   const [options, setOptions] = useState<OptionsResponse | null>(null);
@@ -44,7 +45,13 @@ export default function App() {
   const loadOptions = useCallback(async () => {
     setBootError(null);
     try {
-      setOptions(await api.options());
+      const o = await api.options();
+      setOptions(o);
+      // Default to the strongest trained agent. The list also contains
+      // reference policies that are deliberately weaker, and leaving the
+      // choice blank invited picking one of those and concluding the RL
+      // approach had failed.
+      setPolicy((cur) => cur ?? o.policies.find((p) => p.kind === "agent")?.name ?? null);
     } catch (e) {
       setBootError(e as ApiError);
     }
@@ -200,6 +207,8 @@ export default function App() {
                   </div>
                 </div>
 
+                <CabinLegend />
+
                 <CongestionTrace
                   series={series} tick={pb.tick} onSeek={pb.seek} />
 
@@ -210,7 +219,7 @@ export default function App() {
 
           <nav className="flex gap-1 border-b border-chart-line"
             role="tablist" aria-label="Analysis">
-            {(["compare", "train"] as Tab[]).map((t) => (
+            {(["compare", "train", "method"] as Tab[]).map((t) => (
               <button
                 key={t} role="tab" aria-selected={tab === t}
                 onClick={() => setTab(t)}
@@ -221,15 +230,16 @@ export default function App() {
                     : "border-transparent text-chart-muted hover:text-chart-ink")
                 }
               >
-                {t === "compare"
-                  ? "Compare strategies" : "Reinforcement learning"}
+                {t === "compare" ? "Compare strategies"
+                  : t === "train" ? "Reinforcement learning"
+                    : "Method & parameters"}
               </button>
             ))}
           </nav>
 
           {tab === "compare" ? (
             <ComparePanel options={options} config={config} policy={policy} />
-          ) : (
+          ) : tab === "train" ? (
             <TrainPanel
               config={config}
               onTrained={(name) => {
@@ -237,6 +247,8 @@ export default function App() {
                 if (name) { setPolicy(name); setStrategy("rl"); }
               }}
             />
+          ) : (
+            <MethodPanel policies={options.policies} selected={policy} />
           )}
         </div>
       </main>

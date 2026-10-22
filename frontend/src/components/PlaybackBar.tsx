@@ -61,8 +61,8 @@ export function PlaybackBar({ pb, disabled }: {
         />
         <span className="font-mono text-xs text-chart-muted tabular-nums
                          whitespace-nowrap">
-          t {String(pb.tick).padStart(3, "0")} /{" "}
-          {Math.max(0, pb.total - 1)}
+          tick {String(pb.tick).padStart(3, "0")} /{" "}
+          {Math.max(0, pb.total - 1)} ticks
         </span>
       </div>
     </div>

@@ -161,3 +161,65 @@ def test_policy_gradient_beats_random_and_exports_a_qtable():
     obs, info = env.reset(seed=901)
     mask = info["action_mask"]
     assert masked_argmax(q[env.key()], mask) == out["policy"].greedy(env.key(), mask)
+
+
+def test_parity_action_space_round_trips():
+    """Every action decodes to a (band, seat type, parity) and back."""
+    from boarding.envs import (action_to_group, group_to_action, n_actions,
+                               n_parity)
+    cfg = SimConfig(aircraft="mid", use_parity=True)
+    assert n_parity(cfg) == 2
+    assert n_actions(cfg) == cfg.n_bands * 3 * 2
+    seen = set()
+    for a in range(n_actions(cfg)):
+        g = action_to_group(cfg, a)
+        assert 0 <= g[0] < cfg.n_bands and g[2] in (0, 1)
+        assert group_to_action(cfg, g) == a
+        seen.add(g)
+    assert len(seen) == n_actions(cfg)
+
+
+def test_parity_can_be_disabled_for_legacy_policies():
+    from boarding.envs import action_to_group, group_to_action, n_actions
+    cfg = SimConfig(aircraft="mid", use_parity=False)
+    assert n_actions(cfg) == cfg.n_bands * 3
+    for a in range(n_actions(cfg)):
+        g = action_to_group(cfg, a)
+        assert g[2] == 0
+        assert group_to_action(cfg, g) == a
+
+
+def test_parity_actions_select_the_right_row_parity():
+    """A parity action must only ever release a passenger from that parity."""
+    from boarding.envs import BoardingEnv, action_to_group
+    env = BoardingEnv(SimConfig(aircraft="mid", use_parity=True, seed=3))
+    env.reset(seed=3)
+    for _ in range(40):
+        mask = env.info()["action_mask"]
+        if mask.sum() == 0:
+            break
+        a = int(np.argmax(mask))
+        _band, _st, par = action_to_group(env.cfg, a)
+        before = set(env.sim.pending)
+        _o, _r, term, trunc, _i = env.step(a)
+        released = before - set(env.sim.pending)
+        for pid in released:
+            p = env.sim.passengers[pid]
+            assert p.seat.row % 2 == par
+            assert p.seat.seat_type == _st
+            assert p.band == _band
+        if term or trunc:
+            break
+
+
+def test_legacy_policy_still_loads_and_runs():
+    """The shipped 12-action policies must survive the action-space change."""
+    from boarding.policy import load_policy, policy_uses_parity, run_policy
+    q, _meta = load_policy("rl_agent_mid")
+    if q is None:
+        pytest.skip("shipped policy not present")
+    cfg = SimConfig(aircraft="mid", seed=500)
+    assert policy_uses_parity(cfg, q) is False
+    sim = run_policy(cfg, q, log=False)
+    assert sim.done
+    assert sim.stats()["ticks"] > 0

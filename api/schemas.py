@@ -21,6 +21,19 @@ Arrival = Literal["random", "queued", "groups"]
 Strategy = Literal["random", "back_to_front", "wilma", "steffen",
                    "outside_in", "rl"]
 
+#: Accepted by the engine and the API, but not offered in the UI.
+#:
+#: ``tiny`` is a hand-verifiable test fixture. ``queued`` is withheld because
+#: ``BoardingEnv`` never reads ``cfg.arrival``: under perfect compliance the
+#: fixed strategies get passenger-by-passenger sequencing while the RL agent
+#: still releases coarse groups, so any comparison on it flatters the
+#: heuristics. ``scripts/experiments.py`` and the test suite still use both.
+HIDDEN_AIRCRAFT = frozenset({"tiny"})
+HIDDEN_ARRIVALS = frozenset({"queued"})
+
+#: Cabins that exist to benchmark the agent rather than model a real type.
+BENCHMARK_CABINS = frozenset({"mid"})
+
 
 class SimConfigIn(BaseModel):
     """The simulation knobs exposed to the UI (spec Section 4A)."""
@@ -127,7 +140,11 @@ class TrainRequest(BaseModel):
     episodes: int = Field(default=1500, ge=100, le=40000)
     restarts: int = Field(default=1, ge=1, le=8)
     alpha: float = Field(default=0.25, gt=0.0, le=2.0)
-    gamma: float = Field(default=1.0, gt=0.0, le=1.0)
+    # No gamma: the reward is -1 per tick and the objective is *total*
+    # boarding time, so every step in an episode is worth the same and the
+    # trainer is undiscounted by construction (gamma = 1). The field used to
+    # exist here, was never forwarded to the trainer, and was written into
+    # the saved metadata -- which could record a discount that never applied.
     batch: int = Field(default=16, ge=1, le=128)
     save_as: Optional[str] = Field(
         default=None, pattern=r"^[A-Za-z0-9_\-]{1,40}$")
@@ -151,6 +168,9 @@ class TrainJob(BaseModel):
 class PolicyOut(BaseModel):
     name: str
     meta: Dict
+    label: str = ""
+    kind: Literal["agent", "reference", "user"] = "agent"
+    note: str = ""
 
 
 class OptionsResponse(BaseModel):
@@ -173,9 +193,17 @@ class ErrorResponse(BaseModel):
 
 
 def aircraft_catalogue() -> List[Dict]:
+    """Cabins offered in the UI.
+
+    ``tiny`` is deliberately excluded: it is a 4-row fixture that exists so
+    the simulator's behaviour can be worked out by hand in the tests, not a
+    cabin anyone would demo. The engine and the API still accept it.
+    """
     out = []
     for key, spec in AIRCRAFT.items():
         if key not in AircraftName.__args__:  # type: ignore[attr-defined]
+            continue
+        if key in HIDDEN_AIRCRAFT:
             continue
         seats = sum(d.rows * sum(d.blocks) for d in spec.decks)
         out.append({
@@ -185,6 +213,7 @@ def aircraft_catalogue() -> List[Dict]:
             "rows": spec.decks[0].rows,
             "seats": seats,
             "layout": "-".join(str(b) for b in spec.decks[0].blocks),
+            "kind": "benchmark" if key in BENCHMARK_CABINS else "aircraft",
         })
     return out
 

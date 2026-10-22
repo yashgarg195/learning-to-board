@@ -35,6 +35,79 @@ function paxFill(state: number): string {
   }
 }
 
+/** Seat-square fills. Kept next to `seatFill` so the two cannot drift. */
+const SEAT_KEY = [
+  { fill: "#FFFFFF", stroke: "#CBD4D2", label: "Empty seat" },
+  { fill: "#F7E6CE", stroke: "#E0902F", label: "Being stowed into" },
+  { fill: "#D8C9A8", stroke: "#A8966D", label: "Occupied" },
+  { fill: "url(#legendHatch)", stroke: "#CBD4D2", label: "Aisle" },
+] as const;
+
+/** Passenger-dot fills, mirroring `paxFill`. */
+const PAX_KEY = [
+  { fill: "#9FB0AE", label: "Queued at gate" },
+  { fill: "#2E6DA4", label: "Walking" },
+  { fill: "#E0902F", label: "Stowing bag" },
+  { fill: "#B4442E", label: "Blocked" },
+  { fill: "#A8966D", label: "Seated" },
+] as const;
+
+/**
+ * Colour key for the cabin plan. Rendered beside the plan rather than inside
+ * the SVG so it reflows independently of the cabin's fixed aspect ratio.
+ */
+export function CabinLegend() {
+  return (
+    <div className="flex flex-wrap items-start gap-x-8 gap-y-3 pt-3 mt-1
+                    border-t border-chart-line">
+      <svg width="0" height="0" className="absolute" aria-hidden>
+        <defs>
+          <pattern id="legendHatch" width="4" height="4"
+            patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="4" height="4" fill="#EDF0EE" />
+            <line x1="0" y1="0" x2="0" y2="4" stroke="#CBD4D2"
+              strokeWidth="1.5" />
+          </pattern>
+        </defs>
+      </svg>
+
+      <div>
+        <p className="chart-label mb-1.5">Seats</p>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1.5 list-none p-0 m-0">
+          {SEAT_KEY.map((s) => (
+            <li key={s.label} className="flex items-center gap-1.5">
+              <svg width="13" height="13" aria-hidden className="shrink-0">
+                <rect x="0.5" y="0.5" width="12" height="12" rx="2"
+                  fill={s.fill} stroke={s.stroke} strokeWidth="1" />
+              </svg>
+              <span className="text-xs text-chart-ink">{s.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p className="chart-label mb-1.5">Passengers</p>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1.5 list-none p-0 m-0">
+          {PAX_KEY.map((p) => (
+            <li key={p.label} className="flex items-center gap-1.5">
+              <svg width="13" height="13" aria-hidden className="shrink-0">
+                <circle cx="6.5" cy="6.5" r="5" fill={p.fill} />
+              </svg>
+              <span className="text-xs text-chart-ink">{p.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="text-xs text-chart-muted max-w-[22rem] leading-relaxed">
+        A dark bar inside a passenger dot marks a carry-on still being stowed.
+        Magenta markers on the cabin edge are the active boarding doors.
+      </p>
+    </div>
+  );
+}
+
 /**
  * Cabin plan view: rows run left-to-right (nose at the left), seat columns
  * top-to-bottom. Every glyph is driven by the backend frame — nothing here

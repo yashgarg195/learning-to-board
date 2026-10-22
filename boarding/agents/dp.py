@@ -1,4 +1,4 @@
-"""Labs 3-5 -- exact dynamic programming on a tiny cabin.
+"""Exact dynamic programming on a tiny cabin.
 
 The full simulator has no closed-form transition model, so DP is run on an
 *exact deterministic surrogate* of a tiny 4-row x 4-seat (2-2) cabin.  This is

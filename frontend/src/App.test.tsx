@@ -7,9 +7,9 @@ import type { OptionsResponse, SimulateResponse } from "./api/types";
 const OPTIONS: OptionsResponse = {
   aircraft: [
     { value: "a320", label: "Airbus A320", decks: 1, rows: 30, seats: 180,
-      layout: "3-3" },
-    { value: "tiny", label: "Tiny", decks: 1, rows: 4, seats: 16,
-      layout: "2-2" },
+      layout: "3-3", kind: "aircraft" },
+    { value: "mid", label: "Mid cabin", decks: 1, rows: 10, seats: 60,
+      layout: "3-3", kind: "benchmark" },
   ],
   gates: ["front", "back", "both"],
   arrivals: [
@@ -76,7 +76,7 @@ describe("App", () => {
       // Only backend-advertised aircraft appear.
       const select = screen.getByLabelText("Aircraft") as HTMLSelectElement;
       expect([...select.options].map((o) => o.value))
-        .toEqual(["a320", "tiny"]);
+        .toEqual(["a320", "mid"]);
     });
 
   it("disables the RL strategy when no policy has been trained", async () => {
@@ -125,7 +125,7 @@ describe("App", () => {
     expect(slider.max).toBe("3");
     await userEvent.click(screen.getByRole("button",
       { name: /Step forward one tick/i }));
-    expect(screen.getByText(/t 001/)).toBeInTheDocument();
+    expect(screen.getByText(/tick 001/)).toBeInTheDocument();
     // Replay is local: no extra network traffic.
     expect(fetchMock.mock.calls.length).toBe(calls);
   });

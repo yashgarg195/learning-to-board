@@ -45,8 +45,19 @@ def available_policies() -> List[str]:
     return sorted(f[:-5] for f in os.listdir(POLICY_DIR) if f.endswith(".json"))
 
 
+def policy_uses_parity(cfg: SimConfig, q: QTable) -> bool:
+    """Whether a saved table was trained with the row-parity action split.
+
+    Older policies were trained with ``n_bands x 3`` actions. Their tables are
+    still valid, so rather than invalidate them we infer the action space from
+    the table's own width and run them in the matching mode.
+    """
+    return int(getattr(q, "n", 0)) >= cfg.n_bands * 3 * 2
+
+
 def run_policy(cfg: SimConfig, q: QTable, log: bool = True) -> Simulator:
     """Greedy roll-out of a tabular policy; returns the finished simulator."""
+    cfg = cfg.copy(use_parity=policy_uses_parity(cfg, q))
     env = BoardingEnv(cfg, log=log)
     obs, info = env.reset(seed=cfg.seed)
     done = False

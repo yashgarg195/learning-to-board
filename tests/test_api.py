@@ -28,15 +28,49 @@ def test_health():
 def test_options_lists_only_supported_values():
     o = client.get("/api/options").json()
     assert {a["value"] for a in o["aircraft"]} == {
-        "tiny", "mid", "atr72", "a320", "b787", "b777", "a380"}
-    assert {a["value"] for a in o["arrivals"]} == {
-        "random", "queued", "groups"}
+        "mid", "atr72", "a320", "b787", "b777", "a380"}
+    assert {a["value"] for a in o["arrivals"]} == {"random", "groups"}
     assert o["gates"] == ["front", "back", "both"]
     assert o["states"] == {"QUEUED": QUEUED, "WALKING": WALKING,
                            "STOWING": STOWING, "BLOCKED": BLOCKED,
                            "SEATED": SEATED}
     # Every advertised aircraft reports a real seat count.
     assert all(a["seats"] > 0 for a in o["aircraft"])
+
+
+def test_hidden_options_are_absent_from_the_ui_but_still_accepted():
+    """`tiny` and `queued` are engine features, not product options.
+
+    The tests and `scripts/experiments.py` depend on both, so the API must
+    keep accepting them even though neither is offered in a dropdown.
+    """
+    o = client.get("/api/options").json()
+    assert "tiny" not in {a["value"] for a in o["aircraft"]}
+    assert "queued" not in {a["value"] for a in o["arrivals"]}
+
+    r = client.post("/api/simulate", json={
+        "config": {"aircraft": "tiny", "arrival": "queued", "seed": 1},
+        "strategy": "wilma"})
+    assert r.status_code == 200
+    assert r.json()["stats"]["ticks"] > 0
+
+
+def test_reference_policies_are_not_offered_for_boarding():
+    """Q(lambda) is documented as failing here; it must not sit in the
+    dropdown next to the trained agents."""
+    names = {p["name"] for p in client.get("/api/policies").json()}
+    assert names.isdisjoint({"rl_mc", "rl_sarsa", "rl_qlearning", "rl_linear"})
+    assert names, "at least one trained agent must remain selectable"
+    assert all(p["kind"] != "reference"
+               for p in client.get("/api/policies").json())
+
+
+def test_train_request_rejects_gamma():
+    """Gamma was never forwarded to the trainer, so accepting it would let a
+    caller record a discount factor that was never applied."""
+    r = client.post("/api/train", json={
+        "config": TINY, "episodes": 100, "gamma": 0.5})
+    assert r.status_code == 422
 
 
 def test_options_strategies_all_runnable():
@@ -224,3 +258,72 @@ def test_train_rejects_bad_policy_name():
     r = client.post("/api/train", json={
         "config": TINY, "episodes": 100, "save_as": "../escape"})
     assert r.status_code == 422
+
+
+def test_policy_catalogue_ranks_agents_above_references():
+    """The dropdown must not present a known-weak reference artifact as "the agent".
+
+    `rl_mc`, `rl_sarsa` and `rl_qlearning` exist to show which algorithms fail
+    on this problem; they are slower than the heuristics by design. They are
+    flagged `reference` and sorted last so the UI can group them separately.
+    """
+    rows = client.get("/api/policies").json()
+    assert rows, "expected shipped policies in artifacts/policies/"
+
+    kinds = [p["kind"] for p in rows]
+    assert kinds == sorted(kinds, key=lambda k: {"agent": 0, "user": 1,
+                                                 "reference": 2}[k])
+
+    by_name = {p["name"]: p for p in rows}
+    assert by_name["rl_agent"]["kind"] == "agent"
+    assert by_name["rl_agent_mid"]["kind"] == "agent"
+    for ref in ("rl_mc", "rl_sarsa", "rl_qlearning"):
+        if ref in by_name:
+            assert by_name[ref]["kind"] == "reference"
+            assert by_name[ref]["note"]
+
+    # The first entry is what the UI auto-selects, so it must be a real agent.
+    assert rows[0]["kind"] == "agent"
+    assert rows[0]["label"] != rows[0]["name"], "agents need a descriptive label"
+
+
+def test_options_and_policies_agree():
+    a = client.get("/api/options").json()["policies"]
+    b = client.get("/api/policies").json()
+    assert a == b
+
+
+def test_unhandled_error_still_returns_the_json_envelope(monkeypatch):
+    """A 500 must be JSON, not the bare text "Internal Server Error".
+
+    Starlette's default 500 body is plain text, which the browser client tried
+    to JSON.parse -- producing "Unexpected token 'I'" and hiding the real
+    cause. The catch-all handler keeps the envelope consistent.
+    """
+    from fastapi.testclient import TestClient
+
+    import api.main as main
+
+    def boom(*a, **kw):
+        raise RuntimeError("engine exploded")
+
+    monkeypatch.setattr(main, "_run", boom)
+    with TestClient(main.app, raise_server_exceptions=False) as c:
+        r = c.post("/api/simulate",
+                   json={"config": TINY, "strategy": "wilma"})
+    assert r.status_code == 500
+    assert r.headers["content-type"].startswith("application/json")
+    body = r.json()
+    assert body["error"]["code"] == "internal_error"
+    assert "RuntimeError" in str(body["error"]["detail"])
+
+
+def test_parity_policy_runs_through_the_api():
+    """Both policy generations must be usable without a server restart."""
+    names = [p["name"] for p in client.get("/api/policies").json()]
+    for name in names:
+        r = client.post("/api/simulate", json={
+            "config": {"aircraft": "mid", "seed": 500},
+            "strategy": "rl", "policy": name})
+        assert r.status_code == 200, (name, r.text[:200])
+        assert r.json()["stats"]["ticks"] > 0

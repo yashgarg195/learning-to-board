@@ -184,7 +184,7 @@ AIRCRAFT: Dict[str, Aircraft] = {
     "a380": Aircraft("a380", "Airbus A380 (2 decks)",
                      (_deck("main", 44, (3, 4, 3)),
                       _deck("upper", 30, (2, 4, 2)))),
-    # Tiny cabins used for exact DP / tabular work (Labs 3-6).
+    # Small cabins used for exact DP and tabular work.
     "tiny": Aircraft("tiny", "Tiny cabin (4 rows, 2-2)",
                      (_deck("main", 4, (2, 2)),)),
     "mid": Aircraft("mid", "Mid cabin (10 rows, 3-3)",
@@ -208,6 +208,7 @@ class SimConfig:
     walk_ticks_per_row: int = 1
     seed: int = 42
     n_bands: int = 4                       # row bands used by actions/features
+    use_parity: bool = True                # split actions by odd/even row
     block_penalty: float = 0.0             # optional reward shaping (Section 3)
     max_ticks: int = 20000
 

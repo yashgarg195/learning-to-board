@@ -106,12 +106,24 @@ export interface TrainJob {
 export interface PolicyInfo {
   name: string;
   meta: Record<string, unknown>;
+  /** Display name. `kind: "agent"` policies get a descriptive label. */
+  label: string;
+  /**
+   * `agent`     — trained for use; what the demo should select.
+   * `user`      — trained in this app.
+   * `reference` — algorithm-comparison artifacts kept to show which algorithms fail
+   *               on this problem. Deliberately slower than the heuristics.
+   */
+  kind: "agent" | "user" | "reference";
+  note: string;
 }
 
 export interface OptionsResponse {
   aircraft: {
     value: AircraftName; label: string; decks: number;
     rows: number; seats: number; layout: string;
+    /** "benchmark" cabins exist to evaluate the agent, not to model a type. */
+    kind: "aircraft" | "benchmark";
   }[];
   gates: Gate[];
   arrivals: { value: Arrival; label: string; description: string }[];

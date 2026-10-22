@@ -1,0 +1,11 @@
+# Documentation-only dependencies.
+#
+# Not needed to run the simulator, the API, the tests or the front end. Install
+# these only to regenerate presentation/boarding-technical-reference.pdf:
+#
+#     .venv/bin/pip install -r requirements-docs.txt
+#     PYTHONPATH=. .venv/bin/python presentation/build_reference.py
+#
+# reportlab 5.x requires Python 3.10+; this codebase targets 3.9, so the
+# constraint below is deliberate.
+reportlab<5

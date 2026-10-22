@@ -227,7 +227,7 @@ def transfer(q, seeds):
     return rows
 
 
-# ------------------------------------------------------------------- Lab 6
+# ---------------------------------------------------------- Monte-Carlo
 def mc_first_vs_every(quick=False):
     env = BoardingEnv(SimConfig(aircraft="tiny"))
     eps = 120 if quick else 600

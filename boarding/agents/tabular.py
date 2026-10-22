@@ -1,7 +1,7 @@
-"""Labs 6-8 -- tabular model-free prediction and control on the real simulator.
+"""Tabular model-free prediction and control on the real simulator.
 
-  * Lab 6: Monte-Carlo prediction, first-visit vs every-visit
-  * Labs 7-8: SARSA (on-policy) vs Q-learning (off-policy), plus Monte-Carlo
+  * Monte-Carlo prediction, first-visit vs every-visit
+  * SARSA (on-policy) vs Q-learning (off-policy), plus Monte-Carlo
     control as a reference
 
 WHY ELIGIBILITY TRACES (implementation decision, stated openly):
@@ -39,7 +39,7 @@ def _episode_seed(ep: int, rng: random.Random, n_seeds: int) -> int:
     return rng.randrange(1, 10 ** 6)
 
 
-# ------------------------------------------------------------ Lab 6: MC
+# ------------------------------------------------------------ Monte-Carlo
 def mc_prediction(env: BoardingEnv, episodes: int = 400, gamma: float = 1.0,
                   first_visit: bool = True, seed: int = 0) -> Dict[str, object]:
     """Monte-Carlo *prediction* of the uniform-random gate policy."""
@@ -113,7 +113,7 @@ def mc_control(env: BoardingEnv, episodes: int = 4000, gamma: float = 1.0,
             "algo": "mc_control"}
 
 
-# ------------------------------------------------------- Labs 7-8: TD control
+# ------------------------------------------------------------- TD control
 def td_control(env: BoardingEnv, episodes: int = 6000, alpha: float = 0.05,
                gamma: float = 1.0, lam: float = 0.95, eps_start: float = 1.0,
                eps_end: float = 0.05, algo: str = "sarsa", seed: int = 0,

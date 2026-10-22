@@ -129,7 +129,8 @@ export function ComparePanel({ options, config, policy }: {
                   axisLine={{ stroke: "#CBD4D2" }} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#5A6E74" }}
                   axisLine={false} tickLine={false}
-                  label={{ value: "ticks", angle: -90, position: "insideLeft",
+                  label={{ value: "Boarding time (ticks)", angle: -90,
+                    position: "insideLeft",
                     fontSize: 10, fill: "#5A6E74" }} />
                 <Tooltip
                   cursor={{ fill: "#EDF0EE" }}
@@ -156,7 +157,8 @@ export function ComparePanel({ options, config, policy }: {
             <caption className="sr-only">Strategy comparison results</caption>
             <thead>
               <tr className="border-b border-chart-rule">
-                {["Strategy", "Mean", "Std", "Best", "Worst", "Avg wait"]
+                {["Strategy", "Mean (ticks)", "Std (ticks)", "Best (ticks)",
+                  "Worst (ticks)", "Avg wait (ticks)"]
                   .map((h) => (
                     <th key={h} className="chart-label text-left py-1.5 pr-3">
                       {h}

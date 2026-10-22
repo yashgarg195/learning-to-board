@@ -1,4 +1,4 @@
-"""Lab 9 + Unit 7 -- function approximation and policy gradient.
+"""Function approximation and policy gradient.
 
 Both agents consume the *size-independent* feature vector from
 ``boarding.envs.observe`` (fractions, not counts), so a single weight vector

@@ -1,4 +1,4 @@
-"""Lab 2 -- multi-armed bandits over a fixed set of boarding strategies.
+"""Multi-armed bandits over a fixed set of boarding strategies.
 
 Each arm is one of the baseline strategies.  Pulling an arm = running one
 boarding episode with that strategy on a fresh random seed.  Reward is the

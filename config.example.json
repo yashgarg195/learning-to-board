@@ -19,10 +19,10 @@
   "policy": null,
 
   "_field_notes": {
-    "aircraft": "tiny | mid | atr72 | a320 | b787 | b777 | a380",
+    "aircraft": "atr72 | a320 | b787 | b777 | a380 | mid (benchmark cabin) — 'tiny' is also accepted but is a test fixture, not offered in the UI",
     "n_passengers": "null fills the cabin; otherwise 1..seats",
     "gate": "front | back | both (both opens two doors and routes each passenger to the nearer one)",
-    "arrival": "random | queued | groups — how well passengers comply with the called order",
+    "arrival": "random | groups — how well passengers comply with the called order. 'queued' is accepted but withheld from the UI: the RL env ignores arrival, so perfect compliance flatters the fixed strategies",
     "luggage_fraction": "0.0..1.0 share of passengers with a carry-on to stow",
     "stow_ticks": "ticks to stow a bag in the overhead bin",
     "no_bag_ticks": "ticks to sit down without a bag",

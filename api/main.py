@@ -361,3 +361,14 @@ def train_list() -> List[Dict]:
 @app.get("/api/policies", response_model=List[PolicyOut])
 def policies() -> List[Dict]:
     return _policy_catalogue()
+
+
+# Serve compiled frontend assets if present (e.g. for Render or single-service production)
+_FRONTEND_DIST = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist"
+)
+if os.path.isdir(_FRONTEND_DIST):
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/", StaticFiles(directory=_FRONTEND_DIST, html=True), name="frontend")
+
